@@ -78,6 +78,7 @@ class Orderable_Org {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_shortcodes();
 
 	}
 
@@ -172,6 +173,26 @@ class Orderable_Org {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+	}
+
+	/**
+	 * Register all short codes of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_shortcodes() {
+
+		add_shortcode('orderable_org_ui', function ( $attributes ) {
+			$host = $attributes['host'];
+			if (empty($host)) {
+				return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
+			} else {
+				$id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
+				return '<div id="'.$id.'"></div><script charset="utf8" type="text/javascript" id="'.$id.'_script">function init_'.$id.'() {Orderable.init({}, document.querySelector("#'.$id.'"));}</script><script charset="utf8" type="text/javascript" src="'.$host.'/api/ui.js" defer onload="init_'.$id.'({apiUrl: \''.$host.'/api/public\'});"></script>';
+			}
+		});
 
 	}
 
