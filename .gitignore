@@ -37,3 +37,6 @@ dwsync.xml
 intermediate
 .idea
 cache
+
+# Artifacts
+/orderable-org-*.zip
