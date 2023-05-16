@@ -73,7 +73,8 @@ class Orderable_Org_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->orderable_org, plugin_dir_url( __FILE__ ) . 'css/orderable-org-public.css', array(), $this->version, 'all' );
+		// Disabled because unused
+		//wp_enqueue_style( $this->orderable_org, plugin_dir_url( __FILE__ ) . 'css/orderable-org-public.css', array(), $this->version, 'all' );
 
 	}
 
@@ -96,7 +97,8 @@ class Orderable_Org_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->orderable_org, plugin_dir_url( __FILE__ ) . 'js/orderable-org-public.js', array( 'jquery' ), $this->version, false );
+		// Disabled because unused
+		//wp_enqueue_script( $this->orderable_org, plugin_dir_url( __FILE__ ) . 'js/orderable-org-public.js', array( 'jquery' ), $this->version, false );
 
 	}
 
