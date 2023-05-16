@@ -190,7 +190,7 @@ class Orderable_Org {
 				return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
 			} else {
 				$id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
-				return '<div id="'.$id.'"></div><script charset="utf8" type="text/javascript" id="'.$id.'_script">function init_'.$id.'(config) {Orderable.init(config, document.querySelector("#'.$id.'"));}</script><script charset="utf8" type="text/javascript" src="'.$host.'/api/ui.js" defer onload="init_'.$id.'({apiUrl: \''.$host.'/api/public\'});"></script>';
+				return '<div id="'.$id.'"></div><script charset="utf8" type="text/javascript" id="'.$id.'_script">function init_'.$id.'(config) {Orderable.init(config, document.querySelector("#'.$id.'"));}</script><script charset="utf8" type="text/javascript" src="'.$host.'/assets/js/embed.js" defer onload="init_'.$id.'({apiUrl: \''.$host.'/api/public\'});"></script>';
 			}
 		});
 
