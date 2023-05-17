@@ -186,11 +186,15 @@ class Orderable_Org {
 
 		add_shortcode('orderable_org_ui', function ( $attributes ) {
 			$host = $attributes['host'];
+			$theme = json_encode(json_decode($attributes['theme']) ?? new stdClass());
 			if (empty($host)) {
 				return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
 			} else {
 				$id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
-				return '<div id="'.$id.'"></div><script charset="utf8" type="text/javascript" id="'.$id.'_script">function init_'.$id.'(config) {Orderable.init(config, document.querySelector("#'.$id.'"));}</script><script charset="utf8" type="text/javascript" src="'.$host.'/assets/js/embed.js" defer onload="init_'.$id.'({apiUrl: \''.$host.'/api/public\'});"></script>';
+				$html  = '<div id="'.$id.'"></div>';
+				$html .= '<script charset="utf8" type="text/javascript" id="'.$id.'_script">function init_'.$id.'() {Orderable.init({apiUrl: \''.$host.'/api/public\', themeConfig: JSON.parse(\''.str_replace("'", "\'", $theme).'\')}, document.querySelector("#'.$id.'"));}</script>';
+				$html .= '<script charset="utf8" type="text/javascript" src="'.$host.'/assets/js/embed.js" defer onload="init_'.$id.'();"></script>';
+				return $html;
 			}
 		});
 
