@@ -40,6 +40,8 @@ class Orderable_Org_Public {
 	 */
 	private $version;
 
+	private $uis;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -51,6 +53,7 @@ class Orderable_Org_Public {
 
 		$this->orderable_org = $orderable_org;
 		$this->version = $version;
+		$this->uis = array();
 
 	}
 
@@ -102,4 +105,45 @@ class Orderable_Org_Public {
 
 	}
 
+	/**
+	 * Add required javascript to the page if a shortcode is used.
+	 *
+	 * @since    1.0.0
+	 */
+	public function do_footer() {
+		if (count($this->uis) > 0) {
+			$html = '';
+			$html .= '<script charset="utf8" type="text/javascript" id="orderable_org_ui_init_script">function orderable_org_ui_init() {';
+			foreach ($this->uis as $ui) {
+				$html .= 'Orderable.init({apiUrl: \''.$ui->host.'/api/public\', themeConfig: JSON.parse(\''.str_replace("'", "\'", $ui->theme).'\')}, document.querySelector("#'.$ui->id.'"));';
+			}
+			$html .= '}</script>';
+			$html .= '<script charset="utf8" type="text/javascript" src="'.$this->uis[0]->host.'/assets/js/embed.js" defer onload="orderable_org_ui_init();"></script>';
+			echo $html;
+		}
+	}
+
+	/**
+	 * Embedded UI shortcode implmentation
+	 *
+	 * @since    1.0.0
+	 */
+	public function do_ui_shortcode($attributes) {
+
+		$host = $attributes['host'];
+		$theme = json_encode(json_decode($attributes['theme']) ?? new stdClass());
+		if (empty($host)) {
+			return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
+		} else {
+			$ui = new stdClass();
+			$ui->id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
+			$ui->host = $host;
+			$ui->theme = $theme;
+
+			array_push($this->uis, $ui);
+
+			return '<div id="'.$ui->id.'"></div>';
+		}
+
+	}
 }

@@ -73,6 +73,8 @@ class Orderable_Org {
 			$this->version = '1.0.0';
 		}
 		$this->orderable_org = 'orderable-org';
+		$this->plugin_admin = null;
+		$this->plugin_public = null;
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -145,6 +147,36 @@ class Orderable_Org {
 	}
 
 	/**
+	 * On demand create the admin plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function get_plugin_admin() {
+
+		if (is_null($this->plugin_admin)) {
+			$this->plugin_admin = new Orderable_Org_Admin( $this->get_orderable_org(), $this->get_version() );
+		}
+		return $this->plugin_admin;
+
+	}
+
+	/**
+	 * On demand create the public plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function get_plugin_public() {
+
+		if (is_null($this->plugin_public)) {
+			$this->plugin_public = new Orderable_Org_Public( $this->get_orderable_org(), $this->get_version() );
+		}
+		return $this->plugin_public;
+
+	}
+
+	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
 	 *
@@ -153,10 +185,8 @@ class Orderable_Org {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Orderable_Org_Admin( $this->get_orderable_org(), $this->get_version() );
-
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $this->get_plugin_admin(), 'enqueue_styles' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $this->get_plugin_admin(), 'enqueue_scripts' );
 
 	}
 
@@ -169,10 +199,8 @@ class Orderable_Org {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Orderable_Org_Public( $this->get_orderable_org(), $this->get_version() );
-
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->get_plugin_public(), 'enqueue_styles' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->get_plugin_public(), 'enqueue_scripts' );
 
 	}
 
@@ -184,18 +212,9 @@ class Orderable_Org {
 	 */
 	private function define_shortcodes() {
 
+		$this->loader->add_action('wp_footer', $this->get_plugin_public(), 'do_footer', 50);
 		add_shortcode('orderable_org_ui', function ( $attributes ) {
-			$host = $attributes['host'];
-			$theme = json_encode(json_decode($attributes['theme']) ?? new stdClass());
-			if (empty($host)) {
-				return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
-			} else {
-				$id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
-				$html  = '<div id="'.$id.'"></div>';
-				$html .= '<script charset="utf8" type="text/javascript" id="'.$id.'_script">function init_'.$id.'() {Orderable.init({apiUrl: \''.$host.'/api/public\', themeConfig: JSON.parse(\''.str_replace("'", "\'", $theme).'\')}, document.querySelector("#'.$id.'"));}</script>';
-				$html .= '<script charset="utf8" type="text/javascript" src="'.$host.'/assets/js/embed.js" defer onload="init_'.$id.'();"></script>';
-				return $html;
-			}
+			return $this->get_plugin_public()->do_ui_shortcode($attributes);
 		});
 
 	}
