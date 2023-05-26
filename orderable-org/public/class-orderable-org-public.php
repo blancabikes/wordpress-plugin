@@ -115,7 +115,7 @@ class Orderable_Org_Public {
 			$html = '';
 			$html .= '<script charset="utf8" type="text/javascript" id="orderable_org_ui_init_script">function orderable_org_ui_init() {';
 			foreach ($this->uis as $ui) {
-				$html .= 'Orderable.init({apiUrl: \''.$ui->host.'/api/public\', themeConfig: JSON.parse(\''.str_replace("'", "\'", $ui->theme).'\')}, document.querySelector("#'.$ui->id.'"));';
+				$html .= 'Orderable.init({apiUrl: \''.$ui->host.'/api/public\', themeConfig: \''.str_replace("'", "\'", $ui->theme).'\'}, document.querySelector("#'.$ui->id.'"));';
 			}
 			$html .= '}</script>';
 			$html .= '<script charset="utf8" type="text/javascript" src="'.$this->uis[0]->host.'/assets/js/embed.js" defer onload="orderable_org_ui_init();"></script>';
@@ -131,14 +131,13 @@ class Orderable_Org_Public {
 	public function do_ui_shortcode($attributes) {
 
 		$host = $attributes['host'];
-		$theme = json_encode(json_decode($attributes['theme']) ?? new stdClass());
 		if (empty($host)) {
 			return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
 		} else {
 			$ui = new stdClass();
 			$ui->id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
 			$ui->host = $host;
-			$ui->theme = $theme;
+			$ui->theme = $attributes['theme'];
 
 			array_push($this->uis, $ui);
 
