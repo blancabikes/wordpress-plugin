@@ -59,6 +59,17 @@ class Orderable_Org_Admin {
 	 *
 	 * @since    1.0.0
 	 */
+	public function init_settings() {
+		add_settings_section('orderable_org_settings_section', 'Orderable.org', array($this, 'do_settings_section'), 'general');
+		add_settings_field('orderable_org_setting_api_url', 'API Url', array($this, 'do_settings'), 'general', 'orderable_org_settings_section');
+		register_setting('general', 'orderable_org_setting_api_url');
+	}
+
+	/**
+	 * Register the stylesheets for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
 	public function enqueue_styles() {
 
 		/**
@@ -100,4 +111,11 @@ class Orderable_Org_Admin {
 
 	}
 
+	public function do_settings_section() {
+		echo '<p>Your orderable.org plugin settings.</p>';
+	}
+
+	public function do_settings() {
+		echo '<input name="orderable_org_setting_api_url" id="orderable_org_setting_api_url" value="'.get_option('orderable_org_setting_api_url').'" type="text" /><p class="description" id="tagline-description">The url where the orderable.org API is hosted.</p>';
+	}
 }

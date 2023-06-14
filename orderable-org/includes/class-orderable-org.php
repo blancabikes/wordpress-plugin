@@ -185,6 +185,7 @@ class Orderable_Org {
 	 */
 	private function define_admin_hooks() {
 
+		$this->loader->add_action( 'admin_init', $this->get_plugin_admin(), 'init_settings' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $this->get_plugin_admin(), 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $this->get_plugin_admin(), 'enqueue_scripts' );
 
@@ -212,7 +213,6 @@ class Orderable_Org {
 	 */
 	private function define_shortcodes() {
 
-		$this->loader->add_action('wp_footer', $this->get_plugin_public(), 'do_footer', 50);
 		add_shortcode('orderable_org_ui', function ( $attributes ) {
 			return $this->get_plugin_public()->do_ui_shortcode($attributes);
 		});

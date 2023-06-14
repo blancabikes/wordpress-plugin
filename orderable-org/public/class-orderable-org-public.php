@@ -40,8 +40,6 @@ class Orderable_Org_Public {
 	 */
 	private $version;
 
-	private $uis;
-
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -53,7 +51,6 @@ class Orderable_Org_Public {
 
 		$this->orderable_org = $orderable_org;
 		$this->version = $version;
-		$this->uis = array();
 
 	}
 
@@ -100,49 +97,36 @@ class Orderable_Org_Public {
 		 * class.
 		 */
 
-		// Disabled because unused
-		//wp_enqueue_script( $this->orderable_org, plugin_dir_url( __FILE__ ) . 'js/orderable-org-public.js', array( 'jquery' ), $this->version, false );
-
+		wp_enqueue_script('orderable-org-ui', get_option('orderable_org_setting_api_url').'/assets/js/embed.js', array(), $this->version, true );
+		add_filter('script_loader_tag', array($this, 'add_attributes_to_scripts'), 10, 2);
 	}
 
 	/**
-	 * Add required javascript to the page if a shortcode is used.
+	 * Typical wordpress crap, you can't easily add attributes to script without
+	 * doing some string replacement in a hook
 	 *
 	 * @since    1.0.0
 	 */
-	public function do_footer() {
-		if (count($this->uis) > 0) {
-			$html = '';
-			$html .= '<script charset="utf8" type="text/javascript" id="orderable_org_ui_init_script">function orderable_org_ui_init() {';
-			foreach ($this->uis as $ui) {
-				$html .= 'Orderable.init({apiUrl: \''.$ui->host.'/api/public\', themeConfig: \''.str_replace("'", "\'", $ui->theme).'\'}, document.querySelector("#'.$ui->id.'"));';
-			}
-			$html .= '}</script>';
-			$html .= '<script charset="utf8" type="text/javascript" src="'.$this->uis[0]->host.'/assets/js/embed.js" defer onload="orderable_org_ui_init();"></script>';
-			echo $html;
+	public function add_attributes_to_scripts($tag, $handle) {
+
+		if ($handle === 'orderable-org-ui') {
+			$tag = str_replace(' src=', ' defer onload="Orderable.init(\''.get_option('orderable_org_setting_api_url').'/api/public\');" src=', $tag);
 		}
+		return $tag;
+
 	}
 
 	/**
-	 * Embedded UI shortcode implmentation
+	 * Embedded UI shortcode implementation
 	 *
 	 * @since    1.0.0
 	 */
 	public function do_ui_shortcode($attributes) {
 
-		$host = $attributes['host'];
-		if (empty($host)) {
-			return '<div><!-- MISSING HOST ATTRIBUTE IN SHORT CODE, USE [orderable_org_ui host="https://tenant.orderable.org"] --></div>';
-		} else {
-			$ui = new stdClass();
-			$ui->id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
-			$ui->host = $host;
-			$ui->theme = $attributes['theme'];
-
-			array_push($this->uis, $ui);
-
-			return '<div id="'.$ui->id.'"></div>';
-		}
+		$ui = new stdClass();
+		$ui->id = 'orderable_org_ui_'.bin2hex(openssl_random_pseudo_bytes(4));
+		$ui->theme = $attributes['theme'];
+		return '<div data-orderable-org-ui="'.base64_encode($ui->theme).'" id="'.$ui->id.'"></div>';
 
 	}
 }
